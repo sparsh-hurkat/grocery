@@ -63,8 +63,11 @@ const App = () => {
 
   // Move Pac-Man based on GPS movement
   const movePacmanFromGPS = (newLat, newLon) => {
-    console.log('movePacmanFromGPS', newLat, newLon);
-    if (!lastGpsPosition) return;
+    console.log('movePacmanFromGPS called with:', newLat, newLon);
+    if (!lastGpsPosition) {
+      console.log('No last GPS position, skipping movement');
+      return;
+    }
 
     const distance = calculateDistance(
       lastGpsPosition.latitude,
@@ -72,6 +75,8 @@ const App = () => {
       newLat,
       newLon
     );
+
+    console.log(`Distance calculated: ${distance.toFixed(2)}m, threshold: ${movementThreshold}m`);
 
     // Only move if the distance is significant enough
     if (distance >= movementThreshold) {
@@ -81,6 +86,8 @@ const App = () => {
         newLat,
         newLon
       );
+
+      console.log(`Bearing calculated: ${bearing.toFixed(1)}°`);
 
       let newDirection = '';
       let newX = pacmanPosition.x;
@@ -105,8 +112,11 @@ const App = () => {
         newX = pacmanPosition.x - 1;
       }
 
+      console.log(`Attempting to move to: (${newX}, ${newY}), direction: ${newDirection}`);
+
       // Check if the new position is valid and move Pac-Man
       if (isValidPosition(newX, newY)) {
+        console.log('Valid position, moving Pac-Man');
         setPacmanPosition({ x: newX, y: newY });
         setDirection(newDirection);
         
@@ -121,10 +131,14 @@ const App = () => {
           }
           return pelletPrev;
         });
+      } else {
+        console.log('Invalid position, blocked by wall');
       }
 
       // Update last GPS position
       setLastGpsPosition({ latitude: newLat, longitude: newLon });
+    } else {
+      console.log('Distance too small, not moving');
     }
   };
 
@@ -143,12 +157,15 @@ const App = () => {
 
     const success = (position) => {
       const { latitude, longitude, accuracy } = position.coords;
+      console.log('GPS position received:', { latitude, longitude, accuracy });
       setGpsPosition({ latitude, longitude });
       setGpsAccuracy(accuracy);
       
       if (!lastGpsPosition) {
+        console.log('Setting initial GPS position');
         setLastGpsPosition({ latitude, longitude });
       } else {
+        console.log('GPS position changed, attempting to move Pac-Man');
         movePacmanFromGPS(latitude, longitude);
       }
     };
@@ -290,11 +307,6 @@ const App = () => {
           score={score}
           pelletsLeft={pellets.size}
         />
-        {/* <GpsControls 
-          gpsEnabled={gpsEnabled}
-          gpsPosition={gpsPosition}
-          gpsAccuracy={gpsAccuracy}
-        /> */}
         {gpsEnabled && gpsPosition && (
             <div className="gps-info">
               <div className="gps-coords">
