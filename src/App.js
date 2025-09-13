@@ -295,6 +295,16 @@ const App = () => {
           gpsPosition={gpsPosition}
           gpsAccuracy={gpsAccuracy}
         /> */}
+        {gpsEnabled && gpsPosition && (
+            <div className="gps-info">
+              <div className="gps-coords">
+                GPS: {gpsPosition.latitude.toFixed(6)}, {gpsPosition.longitude.toFixed(6)}
+              </div>
+              <div className="gps-accuracy">
+                Accuracy: {gpsAccuracy ? `${gpsAccuracy.toFixed(1)}m` : 'Unknown'}
+              </div>
+            </div>
+          )}
         <GameGrid 
           pacmanPosition={pacmanPosition}
           pellets={pellets}
