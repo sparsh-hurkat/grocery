@@ -1,12 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { MAZE_LAYOUT, GRID_SIZE } from './utils/maze';
-import { calculateDistance, calculateBearing } from './utils/gps';
-import GameGrid from './components/GameGrid';
-import Controls from './components/Controls';
+
+const GRID_SIZE = 21;
+const CELL_SIZE = 20;
+
+// Define the maze layout - 1 represents walls, 0 represents empty space
+const MAZE_LAYOUT = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,0,1],
+  [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+  [1,1,1,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,1,1,1],
+  [0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0],
+  [1,1,1,1,0,1,0,1,1,0,0,0,1,1,0,1,0,1,1,1,1],
+  [0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0],
+  [1,1,1,1,0,1,0,1,1,0,0,0,1,1,0,1,0,1,1,1,1],
+  [0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0],
+  [1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1],
+  [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1],
+  [1,0,1,1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,1,0,1],
+  [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+  [1,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,1],
+  [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+  [1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+];
 
 const App = () => {
-  // All state and GPS logic here (same as before)
   const [pacmanPosition, setPacmanPosition] = useState({ x: 10, y: 15 });
   const [direction, setDirection] = useState('right');
   const [pellets, setPellets] = useState(new Set());
@@ -59,6 +82,35 @@ const App = () => {
       return true;
     }
     return false;
+  };
+
+  // Calculate distance between two GPS coordinates
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c; // Distance in meters
+  };
+
+  // Calculate bearing (direction) between two GPS coordinates
+  const calculateBearing = (lat1, lon1, lat2, lon2) => {
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+
+    const y = Math.sin(Δλ) * Math.cos(φ2);
+    const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+
+    let bearing = Math.atan2(y, x) * 180/Math.PI;
+    return (bearing + 360) % 360; // Normalize to 0-360 degrees
   };
 
   // Move Pac-Man based on GPS movement
@@ -277,29 +329,96 @@ const App = () => {
     };
   }, []);
 
-  // Return JSX
+  // Create grid cells
+  const renderGrid = () => {
+    const grid = [];
+    
+    for (let y = 0; y < GRID_SIZE; y++) {
+      for (let x = 0; x < GRID_SIZE; x++) {
+        const isPacman = x === pacmanPosition.x && y === pacmanPosition.y;
+        const isWall = MAZE_LAYOUT[y][x] === 1;
+        const isPellet = hasPellet(x, y);
+        
+        grid.push(
+          <div
+            key={`${x}-${y}`}
+            className={`grid-cell ${isPacman ? 'pacman' : ''} ${isWall ? 'wall' : ''}`}
+            style={{
+              left: x * CELL_SIZE,
+              top: y * CELL_SIZE,
+            }}
+          >
+            {isPacman && (
+              <div className={`pacman-character ${direction}`}>
+                🟡
+              </div>
+            )}
+            {isWall && (
+              <div className="wall-block">
+                █
+              </div>
+            )}
+            {isPellet && !isPacman && (
+              <div className="pellet">
+                •
+              </div>
+            )}
+          </div>
+        );
+      }
+    }
+    
+    return grid;
+  };
+
   return (
     <div className="App">
       <div className="game-container">
         <h1>Pac-Man Game</h1>
-        <Controls 
-          gpsEnabled={gpsEnabled}
-          toggleGPS={gpsEnabled ? disableGPS : enableGPS}
-          movementThreshold={movementThreshold}
-          setMovementThreshold={setMovementThreshold}
-          score={score}
-          pelletsLeft={pellets.size}
-        />
-        {/* <GpsControls 
-          gpsEnabled={gpsEnabled}
-          gpsPosition={gpsPosition}
-          gpsAccuracy={gpsAccuracy}
-        /> */}
-        <GameGrid 
-          pacmanPosition={pacmanPosition}
-          pellets={pellets}
-          direction={direction}
-        />
+        <div className="game-info">
+          <p>Use arrow keys or GPS to move Pac-Man around the grid!</p>
+          <div className="controls">
+            <button 
+              onClick={gpsEnabled ? disableGPS : enableGPS}
+              className={`gps-button ${gpsEnabled ? 'enabled' : 'disabled'}`}
+            >
+              {gpsEnabled ? 'Disable GPS' : 'Enable GPS'}
+            </button>
+            <div className="movement-threshold">
+              <label>Movement Threshold (meters):</label>
+              <input
+                type="range"
+                min="1"
+                max="20"
+                value={movementThreshold}
+                onChange={(e) => setMovementThreshold(parseInt(e.target.value))}
+                disabled={!gpsEnabled}
+              />
+              <span>{movementThreshold}m</span>
+            </div>
+          </div>
+          <div className="score">Score: {score}</div>
+          <div className="pellets-left">Pellets Left: {pellets.size}</div>
+          {gpsEnabled && gpsPosition && (
+            <div className="gps-info">
+              <div className="gps-coords">
+                GPS: {gpsPosition.latitude.toFixed(6)}, {gpsPosition.longitude.toFixed(6)}
+              </div>
+              <div className="gps-accuracy">
+                Accuracy: {gpsAccuracy ? `${gpsAccuracy.toFixed(1)}m` : 'Unknown'}
+              </div>
+            </div>
+          )}
+        </div>
+        <div 
+          className="game-grid"
+          style={{
+            width: GRID_SIZE * CELL_SIZE,
+            height: GRID_SIZE * CELL_SIZE,
+          }}
+        >
+          {renderGrid()}
+        </div>
       </div>
     </div>
   );
