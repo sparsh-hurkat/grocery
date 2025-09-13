@@ -16,7 +16,7 @@ const App = () => {
   const [gpsPosition, setGpsPosition] = useState(null);
   const [lastGpsPosition, setLastGpsPosition] = useState(null);
   const [gpsAccuracy, setGpsAccuracy] = useState(null);
-  const [movementThreshold, setMovementThreshold] = useState(5);
+  const [movementThreshold, setMovementThreshold] = useState(1);
 
   // --- Mock GPS state ---
   const [useMockGPS, setUseMockGPS] = useState(false);
