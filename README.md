@@ -55,6 +55,39 @@ npm run dev
 npm run build
 ```
 
+## 🚀 Deployment
+
+This project is configured for GitHub Pages deployment with automatic HTTPS (required for compass features).
+
+### Automatic Deployment (Recommended)
+
+1. **Push to GitHub:**
+   ```bash
+   git add .
+   git commit -m "Deploy 3D Pac-Man game"
+   git push origin main
+   ```
+
+2. **Enable GitHub Pages:**
+   - Go to your repository settings
+   - Navigate to "Pages" section
+   - Set source to "GitHub Actions"
+   - The workflow will automatically deploy on every push to main
+
+3. **Access your game:**
+   - Your game will be available at: `https://yourusername.github.io/3d-pacman-game/`
+   - HTTPS is automatically provided, enabling compass features on mobile!
+
+### Manual Deployment
+
+Alternatively, you can deploy manually:
+
+```bash
+npm run deploy
+```
+
+> **Important**: Update the `homepage` field in `package.json` with your actual GitHub username
+
 ## Technologies Used
 
 - React 18
