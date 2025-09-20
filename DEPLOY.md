@@ -8,9 +8,9 @@
 ## Step-by-Step Deployment
 
 ### 1. Update Configuration
-- [ ] Edit `package.json` and replace `username` with your GitHub username in the homepage URL:
+- [x] ✅ Already configured for the `grocery` repository:
   ```json
-  "homepage": "https://YOUR_USERNAME.github.io/3d-pacman-game"
+  "homepage": "https://sparsh-hurkat.github.io/grocery"
   ```
 
 ### 2. Initial Git Setup (if not done)
@@ -19,7 +19,7 @@
 git init
 
 # Add remote origin
-git remote add origin https://github.com/YOUR_USERNAME/3d-pacman-game.git
+git remote add origin https://github.com/sparsh-hurkat/grocery.git
 
 # Add all files
 git add .
@@ -44,7 +44,7 @@ git push -u origin main
 ### 5. Automatic Deployment
 - The GitHub Actions workflow will automatically trigger
 - Check the "Actions" tab to see deployment progress
-- Once complete, your game will be available at: `https://YOUR_USERNAME.github.io/3d-pacman-game/`
+- Once complete, your game will be available at: `https://sparsh-hurkat.github.io/grocery/`
 
 ## Testing on Mobile
 1. Open the deployed URL on your mobile device
@@ -80,6 +80,6 @@ npm run deploy
 
 ---
 
-**Live URL Format**: `https://YOUR_USERNAME.github.io/3d-pacman-game/`
+**Live URL**: `https://sparsh-hurkat.github.io/grocery/`
 
 Happy gaming! 🎮
