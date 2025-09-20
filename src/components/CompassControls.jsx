@@ -8,6 +8,8 @@ function CompassControls({
   compassDirection, 
   heading,
   isInitialized,
+  needsUserActivation,
+  onActivateCompass,
   onRequestPermission 
 }) {
   return (
@@ -49,6 +51,27 @@ function CompassControls({
                 'Compass timeout - likely not supported' :
                 'Compass not supported on this device'
               }
+            </div>
+          ) : compassPermission === 'needs-activation' ? (
+            <div>
+              <div style={{ color: '#ffd43b', marginBottom: '10px' }}>
+                Android Chrome detected - needs user activation
+              </div>
+              <button 
+                onClick={onActivateCompass}
+                style={{
+                  backgroundColor: '#4ecdc4',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: 'bold'
+                }}
+              >
+                🧭 Enable Compass
+              </button>
             </div>
           ) : compassPermission === 'denied' ? (
             <div>

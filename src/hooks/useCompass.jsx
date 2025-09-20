@@ -6,6 +6,7 @@ function useCompass() {
   const [isSupported, setIsSupported] = useState(false)
   const [permission, setPermission] = useState('unknown')
   const [isInitialized, setIsInitialized] = useState(false)
+  const [needsUserActivation, setNeedsUserActivation] = useState(false)
 
   useEffect(() => {
     let watchId = null
@@ -29,6 +30,18 @@ function useCompass() {
         console.log('Device orientation not supported')
         setIsSupported(false)
         setPermission('not-supported')
+        setIsInitialized(true)
+        return
+      }
+
+      // Check if we need user activation (Android Chrome requirement)
+      const isAndroid = /Android/i.test(navigator.userAgent)
+      const isChrome = /Chrome/i.test(navigator.userAgent)
+      
+      if (isAndroid && isChrome) {
+        // Android Chrome needs user interaction first
+        setNeedsUserActivation(true)
+        setPermission('needs-activation')
         setIsInitialized(true)
         return
       }
@@ -150,6 +163,73 @@ function useCompass() {
       default: return 'up'
     }
   }
+  
+  // Manual activation function for Android Chrome
+  const activateCompass = async () => {
+    if (!needsUserActivation) return
+    
+    console.log('Activating compass manually...')
+    setNeedsUserActivation(false)
+    setPermission('unknown')
+    setIsInitialized(false)
+    
+    // Start the initialization process with user activation
+    let timeoutId = setTimeout(() => {
+      if (!isInitialized) {
+        console.log('Compass activation timeout')
+        setIsSupported(false)
+        setPermission('timeout')
+        setIsInitialized(true)
+      }
+    }, 5000)
+    
+    // Try to request permission if needed
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const response = await DeviceOrientationEvent.requestPermission()
+        if (response !== 'granted') {
+          setIsSupported(false)
+          setPermission('denied')
+          setIsInitialized(true)
+          clearTimeout(timeoutId)
+          return
+        }
+      } catch (error) {
+        console.log('Permission request failed:', error)
+        setIsSupported(false)
+        setPermission('denied')
+        setIsInitialized(true)
+        clearTimeout(timeoutId)
+        return
+      }
+    }
+    
+    setIsSupported(true)
+    setPermission('granted')
+    
+    // Set up orientation listener
+    const orientationHandler = (event) => {
+      clearTimeout(timeoutId)
+      
+      if (!isInitialized) {
+        setIsInitialized(true)
+      }
+      
+      if (event.webkitCompassHeading !== undefined) {
+        const compassHeading = event.webkitCompassHeading
+        setHeading(compassHeading)
+        setCompassDirection(getDirectionFromHeading(compassHeading))
+      } else if (event.alpha !== null) {
+        const alpha = event.alpha
+        const adjustedHeading = (360 - alpha) % 360
+        setHeading(adjustedHeading)
+        setCompassDirection(getDirectionFromHeading(adjustedHeading))
+      }
+    }
+    
+    window.addEventListener('deviceorientationabsolute', orientationHandler, true)
+    window.addEventListener('deviceorientation', orientationHandler, true)
+  }
 
   return {
     heading,
@@ -157,7 +237,9 @@ function useCompass() {
     gameDirection: getGameDirection(),
     isSupported,
     permission,
-    isInitialized
+    isInitialized,
+    needsUserActivation,
+    activateCompass
   }
 }
 

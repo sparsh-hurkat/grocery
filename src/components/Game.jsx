@@ -174,6 +174,8 @@ function Game() {
         compassDirection={compass.compassDirection}
         heading={compass.heading}
         isInitialized={compass.isInitialized}
+        needsUserActivation={compass.needsUserActivation}
+        onActivateCompass={compass.activateCompass}
         onRequestPermission={handleRequestPermission}
       />
       
