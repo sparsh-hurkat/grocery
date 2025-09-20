@@ -5,17 +5,43 @@ function useCompass() {
   const [compassDirection, setCompassDirection] = useState('north')
   const [isSupported, setIsSupported] = useState(false)
   const [permission, setPermission] = useState('unknown')
+  const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
     let watchId = null
+    let timeoutId = null
+    let orientationHandler = null
 
     const initializeCompass = async () => {
+      // Check if we're on a mobile device with compass capability
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      
+      if (!isMobile) {
+        console.log('Desktop device detected - compass not available')
+        setIsSupported(false)
+        setPermission('not-available')
+        setIsInitialized(true)
+        return
+      }
+
       // Check if DeviceOrientationEvent is supported
       if (!window.DeviceOrientationEvent) {
         console.log('Device orientation not supported')
         setIsSupported(false)
+        setPermission('not-supported')
+        setIsInitialized(true)
         return
       }
+
+      // Set a timeout to detect if compass data never arrives
+      timeoutId = setTimeout(() => {
+        if (!isInitialized) {
+          console.log('Compass initialization timeout - assuming not supported')
+          setIsSupported(false)
+          setPermission('timeout')
+          setIsInitialized(true)
+        }
+      }, 5000) // 5 second timeout
 
       // Request permission for iOS 13+
       if (typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -25,19 +51,34 @@ function useCompass() {
           if (response !== 'granted') {
             console.log('Device orientation permission denied')
             setIsSupported(false)
+            setIsInitialized(true)
             return
           }
         } catch (error) {
           console.log('Error requesting device orientation permission:', error)
           setIsSupported(false)
+          setPermission('denied')
+          setIsInitialized(true)
           return
         }
+      } else {
+        setPermission('granted') // Assume granted on non-iOS devices
       }
 
       setIsSupported(true)
 
       // Listen for device orientation changes
-      const handleOrientation = (event) => {
+      orientationHandler = (event) => {
+        // Clear timeout once we get orientation data
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+          timeoutId = null
+        }
+        
+        if (!isInitialized) {
+          setIsInitialized(true)
+        }
+        
         if (event.webkitCompassHeading !== undefined) {
           // iOS - webkitCompassHeading gives magnetic north
           const compassHeading = event.webkitCompassHeading
@@ -53,8 +94,8 @@ function useCompass() {
         }
       }
 
-      window.addEventListener('deviceorientationabsolute', handleOrientation, true)
-      window.addEventListener('deviceorientation', handleOrientation, true)
+      window.addEventListener('deviceorientationabsolute', orientationHandler, true)
+      window.addEventListener('deviceorientation', orientationHandler, true)
 
       // Fallback: Try to use geolocation API for heading if available
       if (navigator.geolocation && navigator.geolocation.watchPosition) {
@@ -74,10 +115,15 @@ function useCompass() {
     initializeCompass()
 
     return () => {
-      window.removeEventListener('deviceorientationabsolute', handleOrientation, true)
-      window.removeEventListener('deviceorientation', handleOrientation, true)
+      if (orientationHandler) {
+        window.removeEventListener('deviceorientationabsolute', orientationHandler, true)
+        window.removeEventListener('deviceorientation', orientationHandler, true)
+      }
       if (watchId) {
         navigator.geolocation.clearWatch(watchId)
+      }
+      if (timeoutId) {
+        clearTimeout(timeoutId)
       }
     }
   }, [])
@@ -110,7 +156,8 @@ function useCompass() {
     compassDirection,
     gameDirection: getGameDirection(),
     isSupported,
-    permission
+    permission,
+    isInitialized
   }
 }
 

@@ -173,6 +173,7 @@ function Game() {
         compassPermission={compass.permission}
         compassDirection={compass.compassDirection}
         heading={compass.heading}
+        isInitialized={compass.isInitialized}
         onRequestPermission={handleRequestPermission}
       />
       

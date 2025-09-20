@@ -7,6 +7,7 @@ function CompassControls({
   compassPermission, 
   compassDirection, 
   heading,
+  isInitialized,
   onRequestPermission 
 }) {
   return (
@@ -36,9 +37,18 @@ function CompassControls({
             🧭 Real Compass Control
           </div>
           
-          {!isCompassSupported ? (
+          {!isInitialized ? (
+            <div style={{ color: '#ffd43b' }}>
+              Initializing compass...
+            </div>
+          ) : !isCompassSupported ? (
             <div style={{ color: '#ff6b6b' }}>
-              Compass not supported on this device
+              {compassPermission === 'not-available' ? 
+                'Desktop device - compass not available' :
+                compassPermission === 'timeout' ?
+                'Compass timeout - likely not supported' :
+                'Compass not supported on this device'
+              }
             </div>
           ) : compassPermission === 'denied' ? (
             <div>
@@ -73,7 +83,7 @@ function CompassControls({
             </div>
           ) : (
             <div style={{ color: '#ffd43b' }}>
-              Initializing compass...
+              Checking compass support...
             </div>
           )}
         </div>
