@@ -14,10 +14,27 @@ function useCompass() {
     let orientationHandler = null
 
     const initializeCompass = async () => {
-      // Check if we're on a mobile device with compass capability
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      console.log('User agent:', navigator.userAgent)
+      console.log('DeviceOrientationEvent available:', !!window.DeviceOrientationEvent)
       
-      if (!isMobile) {
+      // Check if DeviceOrientationEvent is supported
+      if (!window.DeviceOrientationEvent) {
+        console.log('DeviceOrientationEvent not supported')
+        setIsSupported(false)
+        setPermission('not-supported')
+        setIsInitialized(true)
+        return
+      }
+
+      // Check if we're on a mobile device
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const isDesktop = !isMobile && !/Mobi|Android/i.test(navigator.userAgent)
+      
+      console.log('Is mobile:', isMobile)
+      console.log('Is desktop:', isDesktop)
+      
+      // Only block on desktop - allow all mobile devices to try
+      if (isDesktop) {
         console.log('Desktop device detected - compass not available')
         setIsSupported(false)
         setPermission('not-available')
@@ -25,104 +42,13 @@ function useCompass() {
         return
       }
 
-      // Check if DeviceOrientationEvent is supported
-      if (!window.DeviceOrientationEvent) {
-        console.log('Device orientation not supported')
-        setIsSupported(false)
-        setPermission('not-supported')
-        setIsInitialized(true)
-        return
-      }
-
-      // Check if we need user activation (Android Chrome requirement)
-      const isAndroid = /Android/i.test(navigator.userAgent)
-      const isChrome = /Chrome/i.test(navigator.userAgent)
-      
-      if (isAndroid && isChrome) {
-        // Android Chrome needs user interaction first
-        setNeedsUserActivation(true)
-        setPermission('needs-activation')
-        setIsInitialized(true)
-        return
-      }
-
-      // Set a timeout to detect if compass data never arrives
-      timeoutId = setTimeout(() => {
-        if (!isInitialized) {
-          console.log('Compass initialization timeout - assuming not supported')
-          setIsSupported(false)
-          setPermission('timeout')
-          setIsInitialized(true)
-        }
-      }, 5000) // 5 second timeout
-
-      // Request permission for iOS 13+
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        try {
-          const response = await DeviceOrientationEvent.requestPermission()
-          setPermission(response)
-          if (response !== 'granted') {
-            console.log('Device orientation permission denied')
-            setIsSupported(false)
-            setIsInitialized(true)
-            return
-          }
-        } catch (error) {
-          console.log('Error requesting device orientation permission:', error)
-          setIsSupported(false)
-          setPermission('denied')
-          setIsInitialized(true)
-          return
-        }
-      } else {
-        setPermission('granted') // Assume granted on non-iOS devices
-      }
-
-      setIsSupported(true)
-
-      // Listen for device orientation changes
-      orientationHandler = (event) => {
-        // Clear timeout once we get orientation data
-        if (timeoutId) {
-          clearTimeout(timeoutId)
-          timeoutId = null
-        }
-        
-        if (!isInitialized) {
-          setIsInitialized(true)
-        }
-        
-        if (event.webkitCompassHeading !== undefined) {
-          // iOS - webkitCompassHeading gives magnetic north
-          const compassHeading = event.webkitCompassHeading
-          setHeading(compassHeading)
-          setCompassDirection(getDirectionFromHeading(compassHeading))
-        } else if (event.alpha !== null) {
-          // Android - alpha is degrees from north (0-360)
-          // Note: This might need calibration based on device
-          const alpha = event.alpha
-          const adjustedHeading = (360 - alpha) % 360 // Adjust for proper compass reading
-          setHeading(adjustedHeading)
-          setCompassDirection(getDirectionFromHeading(adjustedHeading))
-        }
-      }
-
-      window.addEventListener('deviceorientationabsolute', orientationHandler, true)
-      window.addEventListener('deviceorientation', orientationHandler, true)
-
-      // Fallback: Try to use geolocation API for heading if available
-      if (navigator.geolocation && navigator.geolocation.watchPosition) {
-        watchId = navigator.geolocation.watchPosition(
-          (position) => {
-            if (position.coords.heading !== null && position.coords.heading !== undefined) {
-              setHeading(position.coords.heading)
-              setCompassDirection(getDirectionFromHeading(position.coords.heading))
-            }
-          },
-          (error) => console.log('Geolocation error:', error),
-          { enableHighAccuracy: true }
-        )
-      }
+      // For mobile devices, always show activation button
+      // This handles both Android Chrome and other mobile browsers
+      console.log('Mobile device detected - requiring user activation')
+      setNeedsUserActivation(true)
+      setPermission('needs-activation')
+      setIsInitialized(true)
+      return
     }
 
     initializeCompass()
@@ -164,71 +90,100 @@ function useCompass() {
     }
   }
   
-  // Manual activation function for Android Chrome
+  // Manual activation function for mobile devices
   const activateCompass = async () => {
     if (!needsUserActivation) return
     
-    console.log('Activating compass manually...')
+    console.log('🧭 Activating compass manually...')
+    console.log('Device info:', {
+      userAgent: navigator.userAgent,
+      hasDeviceOrientationEvent: !!window.DeviceOrientationEvent,
+      hasRequestPermission: typeof DeviceOrientationEvent?.requestPermission === 'function'
+    })
+    
     setNeedsUserActivation(false)
-    setPermission('unknown')
+    setPermission('activating')
     setIsInitialized(false)
     
     // Start the initialization process with user activation
     let timeoutId = setTimeout(() => {
-      if (!isInitialized) {
-        console.log('Compass activation timeout')
-        setIsSupported(false)
-        setPermission('timeout')
-        setIsInitialized(true)
-      }
-    }, 5000)
+      console.log('⏰ Compass activation timeout - no data received')
+      setIsSupported(false)
+      setPermission('timeout')
+      setIsInitialized(true)
+    }, 8000) // Longer timeout for mobile
     
-    // Try to request permission if needed
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      try {
+    try {
+      // Try to request permission if needed (iOS)
+      if (typeof DeviceOrientationEvent?.requestPermission === 'function') {
+        console.log('📱 Requesting iOS permission...')
         const response = await DeviceOrientationEvent.requestPermission()
+        console.log('📱 iOS permission response:', response)
+        
         if (response !== 'granted') {
+          console.log('❌ Permission denied')
           setIsSupported(false)
           setPermission('denied')
           setIsInitialized(true)
           clearTimeout(timeoutId)
           return
         }
-      } catch (error) {
-        console.log('Permission request failed:', error)
-        setIsSupported(false)
-        setPermission('denied')
-        setIsInitialized(true)
+      } else {
+        console.log('📱 No permission request needed (Android/other)')
+      }
+      
+      console.log('✅ Setting up orientation listeners...')
+      setIsSupported(true)
+      setPermission('granted')
+      
+      // Set up orientation listener
+      const orientationHandler = (event) => {
+        console.log('📍 Orientation event received:', {
+          alpha: event.alpha,
+          beta: event.beta,
+          gamma: event.gamma,
+          webkitCompassHeading: event.webkitCompassHeading,
+          absolute: event.absolute
+        })
+        
         clearTimeout(timeoutId)
-        return
+        
+        if (!isInitialized) {
+          console.log('🎉 Compass initialized successfully!')
+          setIsInitialized(true)
+        }
+        
+        if (event.webkitCompassHeading !== undefined) {
+          // iOS - webkitCompassHeading gives magnetic north
+          const compassHeading = event.webkitCompassHeading
+          console.log('🧭 iOS compass heading:', compassHeading)
+          setHeading(compassHeading)
+          setCompassDirection(getDirectionFromHeading(compassHeading))
+        } else if (event.alpha !== null && event.alpha !== undefined) {
+          // Android - alpha is degrees from north (0-360)
+          const alpha = event.alpha
+          const adjustedHeading = (360 - alpha) % 360
+          console.log('🧭 Android compass heading:', adjustedHeading, '(raw alpha:', alpha, ')')
+          setHeading(adjustedHeading)
+          setCompassDirection(getDirectionFromHeading(adjustedHeading))
+        } else {
+          console.log('⚠️ No usable compass data in event')
+        }
       }
-    }
-    
-    setIsSupported(true)
-    setPermission('granted')
-    
-    // Set up orientation listener
-    const orientationHandler = (event) => {
+      
+      // Add both event types for broader compatibility
+      window.addEventListener('deviceorientationabsolute', orientationHandler, true)
+      window.addEventListener('deviceorientation', orientationHandler, true)
+      
+      console.log('🔄 Waiting for orientation data...')
+      
+    } catch (error) {
+      console.error('❌ Compass activation failed:', error)
+      setIsSupported(false)
+      setPermission('error')
+      setIsInitialized(true)
       clearTimeout(timeoutId)
-      
-      if (!isInitialized) {
-        setIsInitialized(true)
-      }
-      
-      if (event.webkitCompassHeading !== undefined) {
-        const compassHeading = event.webkitCompassHeading
-        setHeading(compassHeading)
-        setCompassDirection(getDirectionFromHeading(compassHeading))
-      } else if (event.alpha !== null) {
-        const alpha = event.alpha
-        const adjustedHeading = (360 - alpha) % 360
-        setHeading(adjustedHeading)
-        setCompassDirection(getDirectionFromHeading(adjustedHeading))
-      }
     }
-    
-    window.addEventListener('deviceorientationabsolute', orientationHandler, true)
-    window.addEventListener('deviceorientation', orientationHandler, true)
   }
 
   return {

@@ -55,7 +55,7 @@ function CompassControls({
           ) : compassPermission === 'needs-activation' ? (
             <div>
               <div style={{ color: '#ffd43b', marginBottom: '10px' }}>
-                Android Chrome detected - needs user activation
+                Mobile device detected - tap to enable compass
               </div>
               <button 
                 onClick={onActivateCompass}
@@ -63,11 +63,12 @@ function CompassControls({
                   backgroundColor: '#4ecdc4',
                   color: 'white',
                   border: 'none',
-                  padding: '12px 20px',
-                  borderRadius: '8px',
+                  padding: '15px 25px',
+                  borderRadius: '10px',
                   cursor: 'pointer',
-                  fontSize: '16px',
-                  fontWeight: 'bold'
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
                 }}
               >
                 🧭 Enable Compass
