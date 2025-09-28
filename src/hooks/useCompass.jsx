@@ -7,6 +7,13 @@ function useCompass() {
   const [permission, setPermission] = useState('unknown')
   const [isInitialized, setIsInitialized] = useState(false)
   const [needsUserActivation, setNeedsUserActivation] = useState(false)
+  const [debugInfo, setDebugInfo] = useState([])
+  
+  // Add debug message
+  const addDebug = (message) => {
+    console.log(message)
+    setDebugInfo(prev => [...prev.slice(-9), `${new Date().toLocaleTimeString()}: ${message}`])
+  }
 
   useEffect(() => {
     let watchId = null
@@ -14,12 +21,12 @@ function useCompass() {
     let orientationHandler = null
 
     const initializeCompass = async () => {
-      console.log('User agent:', navigator.userAgent)
-      console.log('DeviceOrientationEvent available:', !!window.DeviceOrientationEvent)
+      addDebug(`🔍 User agent: ${navigator.userAgent}`)
+      addDebug(`🔍 DeviceOrientationEvent: ${!!window.DeviceOrientationEvent}`)
       
       // Check if DeviceOrientationEvent is supported
       if (!window.DeviceOrientationEvent) {
-        console.log('DeviceOrientationEvent not supported')
+        addDebug('❌ DeviceOrientationEvent not supported')
         setIsSupported(false)
         setPermission('not-supported')
         setIsInitialized(true)
@@ -30,12 +37,12 @@ function useCompass() {
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
       const isDesktop = !isMobile && !/Mobi|Android/i.test(navigator.userAgent)
       
-      console.log('Is mobile:', isMobile)
-      console.log('Is desktop:', isDesktop)
+      addDebug(`📱 Is mobile: ${isMobile}`)
+      addDebug(`💻 Is desktop: ${isDesktop}`)
       
       // Only block on desktop - allow all mobile devices to try
       if (isDesktop) {
-        console.log('Desktop device detected - compass not available')
+        addDebug('💻 Desktop device detected - compass not available')
         setIsSupported(false)
         setPermission('not-available')
         setIsInitialized(true)
@@ -43,8 +50,7 @@ function useCompass() {
       }
 
       // For mobile devices, always show activation button
-      // This handles both Android Chrome and other mobile browsers
-      console.log('Mobile device detected - requiring user activation')
+      addDebug('📱 Mobile device detected - showing activation button')
       setNeedsUserActivation(true)
       setPermission('needs-activation')
       setIsInitialized(true)
@@ -94,12 +100,8 @@ function useCompass() {
   const activateCompass = async () => {
     if (!needsUserActivation) return
     
-    console.log('🧭 Activating compass manually...')
-    console.log('Device info:', {
-      userAgent: navigator.userAgent,
-      hasDeviceOrientationEvent: !!window.DeviceOrientationEvent,
-      hasRequestPermission: typeof DeviceOrientationEvent?.requestPermission === 'function'
-    })
+    addDebug('🧭 Activating compass manually...')
+    addDebug(`📱 Device info: DeviceOrientationEvent=${!!window.DeviceOrientationEvent}, requestPermission=${typeof DeviceOrientationEvent?.requestPermission === 'function'}`)
     
     setNeedsUserActivation(false)
     setPermission('activating')
@@ -194,7 +196,8 @@ function useCompass() {
     permission,
     isInitialized,
     needsUserActivation,
-    activateCompass
+    activateCompass,
+    debugInfo
   }
 }
 

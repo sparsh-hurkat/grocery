@@ -10,7 +10,8 @@ function CompassControls({
   isInitialized,
   needsUserActivation,
   onActivateCompass,
-  onRequestPermission 
+  onRequestPermission,
+  debugInfo = []
 }) {
   return (
     <Html
@@ -149,6 +150,26 @@ function CompassControls({
             'Arrow keys still work for manual control'
           }
         </div>
+        
+        {/* Debug Console */}
+        {debugInfo.length > 0 && (
+          <div style={{
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            color: '#00ff00',
+            fontFamily: 'monospace',
+            fontSize: '11px',
+            padding: '10px',
+            borderRadius: '5px',
+            maxHeight: '200px',
+            overflow: 'auto',
+            textAlign: 'left'
+          }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>📱 Debug Console:</div>
+            {debugInfo.map((info, i) => (
+              <div key={i} style={{ marginBottom: '2px' }}>{info}</div>
+            ))}
+          </div>
+        )}
       </div>
     </Html>
   )

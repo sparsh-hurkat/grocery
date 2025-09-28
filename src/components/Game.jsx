@@ -177,6 +177,7 @@ function Game() {
         needsUserActivation={compass.needsUserActivation}
         onActivateCompass={compass.activateCompass}
         onRequestPermission={handleRequestPermission}
+        debugInfo={compass.debugInfo}
       />
       
       {/* Game complete check */}
