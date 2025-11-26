@@ -21,11 +21,11 @@ This isn't just a game; it's a new layer of engagement for retail stores.
 *   **Product Discovery:** "Power Pellets" can be placed in specific aisles to guide customers toward promoted products or under-visited sections of the store.
 *   **Health & Wellness:** Encourages walking and active movement while shopping.
 
-<img src="./public/gameplay_1.jpg" width="250" alt="Game Screenshot 2" />
+<img src="./public/todo_list.jpg" width="250" alt="Game Screenshot 2" />
+<img src="./public/gameplay_1.jpg" width="250" alt="Game Screenshot 3" />
 
 ## 🎮 How to Play
 1.  **Build Your List:** Enter the items you need to buy (Milk, Eggs, Bread...).
-<img src="./public/todo_list.jpg" width="250" alt="Game Screenshot 3" />
 2.  **Start the Run:** The app generates a maze populated with your items.
 3.  **Walk:** Hold your phone and walk physically. The app uses the **Accelerometer** to detect steps.
 4.  **Steer:** Rotate your body. The **Magnetometer/Compass** steers the character.
