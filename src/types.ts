@@ -36,3 +36,9 @@ export enum TileType {
   PACMAN_START = 9,
   GHOST_START = 8
 }
+
+export interface ShoppingItem {
+  id: string;
+  name: string;
+  collected: boolean;
+}
