@@ -1,0 +1,9 @@
+{
+  "name": "Pac-Walker Reality",
+  "description": "A reality-augmented arcade game where your real-world steps move the character and your orientation steers. Works best on mobile devices.",
+  "requestFramePermissions": [
+    "accelerometer",
+    "gyroscope",
+    "magnetometer"
+  ]
+}
