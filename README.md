@@ -21,8 +21,11 @@ This isn't just a game; it's a new layer of engagement for retail stores.
 *   **Product Discovery:** "Power Pellets" can be placed in specific aisles to guide customers toward promoted products or under-visited sections of the store.
 *   **Health & Wellness:** Encourages walking and active movement while shopping.
 
-<img src="./public/todo_list.jpg" width="250" alt="Game Screenshot 2" />
-<img src="./public/gameplay_1.jpg" width="250" alt="Game Screenshot 3" />
+<p align="center">
+  <img src="./public/todo_list.jpg" width="250" alt="Game Screenshot 2" />
+  &nbsp; &nbsp;
+  <img src="./public/gameplay_1.jpg" width="250" alt="Game Screenshot 3" />
+</p>
 
 ## 🎮 How to Play
 1.  **Build Your List:** Enter the items you need to buy (Milk, Eggs, Bread...).
