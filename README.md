@@ -11,7 +11,7 @@ Market Run is a Progressive Web App (PWA) that transforms your shopping list int
 
 Your goal? Find the items on your list (represented as Power Pellets) while avoiding the "Ghost Shoppers" (other customers).
 
-![Game Screenshot 1](.public/landing_page.jpg)
+![Game Screenshot 1](./public/landing_page.jpg)
 
 ## 🏪 Retail & Business Use Case
 This isn't just a game; it's a new layer of engagement for retail stores.
@@ -21,17 +21,17 @@ This isn't just a game; it's a new layer of engagement for retail stores.
 *   **Product Discovery:** "Power Pellets" can be placed in specific aisles to guide customers toward promoted products or under-visited sections of the store.
 *   **Health & Wellness:** Encourages walking and active movement while shopping.
 
-![Game Screenshot 3](.public/gameplay_1.jpg)
+![Game Screenshot 3](./public/gameplay_1.jpg)
 
 ## 🎮 How to Play
 1.  **Build Your List:** Enter the items you need to buy (Milk, Eggs, Bread...).
-![Game Screenshot 2](.public/todo_list.jpg)
+![Game Screenshot 2](./public/todo_list.jpg)
 2.  **Start the Run:** The app generates a maze populated with your items.
 3.  **Walk:** Hold your phone and walk physically. The app uses the **Accelerometer** to detect steps.
 4.  **Steer:** Rotate your body. The **Magnetometer/Compass** steers the character.
 5.  **Win:** Collect all items to finish the run and (hypothetically) unlock your coupon!
 
-![Game Screenshot 4](.public/item_found.jpg)
+![Game Screenshot 4](./public/item_found.jpg)
 
 ## 🛠 Tech Stack
 *   **Frontend:** React, TypeScript, Vite
