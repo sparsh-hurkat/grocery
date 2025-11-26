@@ -1,26 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3D Pac-Man Game</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <title>Pac-Walker Reality</title>
+    <!-- We keep Tailwind CDN for quick styling without complex config -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
-        margin: 0;
-        padding: 0;
-        font-family: Arial, sans-serif;
-        background: #000;
-        color: #fff;
-        overflow: hidden;
-      }
-      #root {
-        width: 100vw;
-        height: 100vh;
+        background-color: #000;
+        touch-action: none; /* Prevent pull-to-refresh on mobile */
+        overscroll-behavior: none;
       }
     </style>
-    <script type="module" crossorigin src="/grocery/assets/index-DDBey6-l.js"></script>
-  </head>
+
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-CxWy6QWU.js"></script>
+</head>
   <body>
     <div id="root"></div>
+    <!-- Vite Entry Point -->
   </body>
 </html>
