@@ -1,5 +1,7 @@
 # Market Run: Reality Edition 🛒🏃‍♂️
 
+**Project hosted here: [https://sparsh-hurkat.github.io/grocery/](https://sparsh-hurkat.github.io/grocery/)**
+
 **Built in 24 hours for HackCMU 2025**
 
 > Turn your boring grocery run into an arcade adventure. Walk in the real world to move in the game.
